@@ -1,11 +1,12 @@
 import streamlit as st
 import requests
 import plotly.graph_objects as go
+from collections import defaultdict
 
 st.set_page_config(page_title="Entreprises OSM", layout="wide")
 st.title("Répartition des entreprises par secteur d’activité")
 
-ville = st.selectbox("Choisir une ville", ["Toronto", "Ottawa"])
+villes = st.multiselect("Choisir une ou plusieurs villes", ["Toronto", "Ottawa"], default=["Toronto"])
 
 @st.cache_data(show_spinner=True)
 def get_osm_data(city):
@@ -26,16 +27,6 @@ def get_osm_data(city):
     response = requests.post(url, data={"data": query})
     return response.json()
 
-data = get_osm_data(ville)
-
-secteurs = {}
-for el in data["elements"]:
-    tags = el.get("tags", {})
-    for k in ["shop", "office", "craft"]:
-        if k in tags:
-            secteur = tags[k]
-            secteurs[secteur] = secteurs.get(secteur, 0) + 1
-
 secteurs_valides = {
     "bakery", "hairdresser", "florist", "supermarket", "pharmacy", "butcher",
     "optician", "clothes", "restaurant", "books", "lawyer", "car_repair",
@@ -43,37 +34,57 @@ secteurs_valides = {
     "beauty", "cafe", "variety_store", "furniture", "chemist", "doctor"
 }
 
-if secteurs:
-    defaut = [s for s in secteurs if s in secteurs_valides]
+# Dictionnaire imbriqué : {ville: {secteur: nb}}
+ville_secteurs = defaultdict(lambda: defaultdict(int))
 
-    secteurs_choisis = st.multiselect(
-        "Filtrer par secteur",
-        options=list(secteurs.keys()),
-        default=defaut if defaut else list(secteurs.keys())
+for ville in villes:
+    data = get_osm_data(ville)
+    for el in data["elements"]:
+        tags = el.get("tags", {})
+        for k in ["shop", "office", "craft"]:
+            if k in tags:
+                secteur = tags[k]
+                ville_secteurs[ville][secteur] += 1
+
+# Fusionner les clés de tous les secteurs pour l'affichage
+tous_les_secteurs = set()
+for secteurs in ville_secteurs.values():
+    tous_les_secteurs.update(secteurs.keys())
+
+# Sélection des secteurs
+secteurs_affichables = sorted(tous_les_secteurs)
+defaut = [s for s in secteurs_affichables if s in secteurs_valides]
+
+secteurs_choisis = st.multiselect(
+    "Filtrer par secteur",
+    options=secteurs_affichables,
+    default=defaut if defaut else secteurs_affichables
+)
+
+# Préparation des données pour le bar chart
+fig = go.Figure()
+
+for ville in villes:
+    data = ville_secteurs[ville]
+    filtres = {s: data.get(s, 0) for s in secteurs_choisis}
+    fig.add_bar(
+        x=list(filtres.keys()),
+        y=list(filtres.values()),
+        name=ville
     )
 
-    data_filtrée = {k: v for k, v in secteurs.items() if k in secteurs_choisis}
+fig.update_layout(
+    barmode='group',
+    title=f"Entreprises par secteur d'activité ({', '.join(villes)})",
+    xaxis_title="Secteur",
+    yaxis_title="Nombre",
+    xaxis_tickangle=-45,
+    template="plotly_dark",
+    height=600,
+    margin=dict(t=60, l=40, r=40, b=120)
+)
 
-    fig = go.Figure(data=[
-        go.Bar(
-            x=list(data_filtrée.keys()),
-            y=list(data_filtrée.values()),
-            text=list(data_filtrée.values()),
-            textposition='outside',
-            marker_color='lightskyblue'
-        )
-    ])
-
-    fig.update_layout(
-        title=f"Entreprises à {ville} (secteurs filtrés)",
-        xaxis_title="Secteur",
-        yaxis_title="Nombre",
-        xaxis_tickangle=-45,
-        template="plotly_dark",
-        height=600,
-        margin=dict(t=60, l=40, r=40, b=120)
-    )
-
+if villes:
     st.plotly_chart(fig, use_container_width=True)
 else:
-    st.warning("Aucune entreprise trouvée.")
+    st.warning("Veuillez sélectionner au moins une ville.")
