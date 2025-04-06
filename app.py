@@ -36,7 +36,6 @@ for el in data["elements"]:
             secteur = tags[k]
             secteurs[secteur] = secteurs.get(secteur, 0) + 1
 
-# Liste des secteurs "pertinents" à afficher par défaut
 secteurs_valides = {
     "bakery", "hairdresser", "florist", "supermarket", "pharmacy", "butcher",
     "optician", "clothes", "restaurant", "books", "lawyer", "car_repair",
