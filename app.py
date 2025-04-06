@@ -9,7 +9,6 @@ st.title("Répartition des entreprises par secteur d’activité")
 
 villes = st.multiselect("Choisir une ou plusieurs villes", ["Toronto", "Ottawa"], default=["Toronto"])
 
-# Récupération des données
 ville_secteurs = defaultdict(lambda: defaultdict(int))
 for ville in villes:
     data = get_osm_data(ville)
@@ -20,7 +19,7 @@ for ville in villes:
                 secteur = tags[k]
                 ville_secteurs[ville][secteur] += 1
 
-# Préparation des filtres
+
 tous_les_secteurs = {s for secteurs in ville_secteurs.values() for s in secteurs.keys()}
 secteurs_affichables = sorted(s for s in tous_les_secteurs if s in secteurs_valides)
 defaut = [s for s in secteurs_affichables if s in secteurs_valides]
@@ -38,7 +37,6 @@ secteurs_choisis = st.multiselect(
     key="secteurs_choisis"
 )
 
-# Graphe
 fig = go.Figure()
 for ville in villes:
     data = ville_secteurs[ville]
