@@ -34,7 +34,6 @@ secteurs_valides = {
     "beauty", "cafe", "variety_store", "furniture", "chemist", "doctor"
 }
 
-# Dictionnaire imbriqué : {ville: {secteur: nb}}
 ville_secteurs = defaultdict(lambda: defaultdict(int))
 
 for ville in villes:
@@ -46,24 +45,27 @@ for ville in villes:
                 secteur = tags[k]
                 ville_secteurs[ville][secteur] += 1
 
-# Fusionner les clés de tous les secteurs pour l'affichage
 tous_les_secteurs = set()
 for secteurs in ville_secteurs.values():
     tous_les_secteurs.update(secteurs.keys())
 
-# Sélection des secteurs
 secteurs_affichables = sorted(tous_les_secteurs)
 defaut = [s for s in secteurs_affichables if s in secteurs_valides]
 
+st.write("Filtrer par secteur")
+col1, col2 = st.columns([1, 5])
+with col1:
+    if st.button("Tout sélectionner"):
+        st.session_state["secteurs_choisis"] = secteurs_affichables
+
 secteurs_choisis = st.multiselect(
-    "Filtrer par secteur",
+    label="",
     options=secteurs_affichables,
-    default=defaut if defaut else secteurs_affichables
+    default=st.session_state.get("secteurs_choisis", defaut if defaut else secteurs_affichables),
+    key="secteurs_choisis"
 )
 
-# Préparation des données pour le bar chart
 fig = go.Figure()
-
 for ville in villes:
     data = ville_secteurs[ville]
     filtres = {s: data.get(s, 0) for s in secteurs_choisis}
