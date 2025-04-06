@@ -28,10 +28,15 @@ def get_osm_data(city):
     return response.json()
 
 secteurs_valides = {
-    "bakery", "hairdresser", "florist", "supermarket", "pharmacy", "butcher",
-    "optician", "clothes", "restaurant", "books", "lawyer", "car_repair",
-    "dry_cleaning", "dentist", "insurance", "bank", "electronics", "tailor",
-    "beauty", "cafe", "variety_store", "furniture", "chemist", "doctor"
+    "bakery", "butcher", "clothes", "shoes", "hairdresser", "beauty",
+    "supermarket", "convenience", "florist", "chemist", "pharmacy",
+    "optician", "books", "stationery", "gift", "furniture", "electronics",
+    "mobile_phone", "computer", "jewelry", "watch", "sports", "toys",
+    "dry_cleaning", "laundry", "tailor", "restaurant", "cafe", "fast_food",
+    "bar", "pub", "dentist", "doctor", "veterinary", "insurance", "lawyer",
+    "bank", "real_estate", "travel_agency", "accountant", "car_repair",
+    "car_rental", "bicycle", "garage", "hardware", "doityourself",
+    "variety_store", "greengrocer", "ice_cream"
 }
 
 ville_secteurs = defaultdict(lambda: defaultdict(int))
@@ -49,7 +54,7 @@ tous_les_secteurs = set()
 for secteurs in ville_secteurs.values():
     tous_les_secteurs.update(secteurs.keys())
 
-secteurs_affichables = sorted(tous_les_secteurs)
+secteurs_affichables = sorted(s for s in tous_les_secteurs if s in secteurs_valides)
 defaut = [s for s in secteurs_affichables if s in secteurs_valides]
 
 st.write("Filtrer par secteur")
