@@ -42,7 +42,13 @@ fig = go.Figure()
 for ville in villes:
     data = ville_secteurs[ville]
     filtres = {s: data.get(s, 0) for s in secteurs_choisis}
-    fig.add_bar(x=list(filtres.keys()), y=list(filtres.values()), name=ville)
+    fig.add_bar(
+        x=list(filtres.keys()),
+        y=list(filtres.values()),
+        name=ville,
+        text=list(filtres.values()),
+        textposition='outside'
+    )
 
 fig.update_layout(
     barmode='group',
