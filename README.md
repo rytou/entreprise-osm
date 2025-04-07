@@ -9,9 +9,9 @@ Ce projet Streamlit extrait des données d'entreprises de **Toronto** et **Ottaw
 -  Extraction en temps réel via Overpass API
 -  Sélection multi-villes (Toronto, Ottawa)
 -  Filtrage des secteurs d’activité pertinents
--  Visualisation claire avec Plotly
+-  Visualisation avec Plotly
 -  Bouton "Tout sélectionner"
--  Déploiement simple via Streamlit Cloud
+-  Déploiement via Streamlit Cloud
 
 ---
 
