@@ -19,10 +19,12 @@ for ville in villes:
                 secteur = tags[k]
                 ville_secteurs[ville][secteur] += 1
 
-
 tous_les_secteurs = {s for secteurs in ville_secteurs.values() for s in secteurs.keys()}
 secteurs_affichables = sorted(s for s in tous_les_secteurs if s in secteurs_valides)
 defaut = [s for s in secteurs_affichables if s in secteurs_valides]
+
+if "secteurs_choisis" not in st.session_state:
+    st.session_state["secteurs_choisis"] = defaut
 
 st.write("Filtrer par secteur")
 col1, col2 = st.columns([1, 5])
@@ -33,7 +35,6 @@ with col1:
 secteurs_choisis = st.multiselect(
     label="",
     options=secteurs_affichables,
-    default=st.session_state.get("secteurs_choisis", defaut),
     key="secteurs_choisis"
 )
 
